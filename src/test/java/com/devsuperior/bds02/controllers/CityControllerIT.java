@@ -26,13 +26,13 @@ public class CityControllerIT {
 
 	@Autowired
 	private MockMvc mockMvc;
-	
+
 	@Autowired
 	private ObjectMapper objectMapper;
-	
+
 	@Test
 	public void findAllShouldReturnAllResourcesSortedByName() throws Exception {
-		
+
 		ResultActions result =
 				mockMvc.perform(get("/cities")
 					.contentType(MediaType.APPLICATION_JSON));
@@ -42,56 +42,49 @@ public class CityControllerIT {
 		result.andExpect(jsonPath("$[1].name").value("Belém"));
 		result.andExpect(jsonPath("$[2].name").value("Brasília"));
 	}
-	
+
 	@Test
 	public void insertShouldInsertResource() throws Exception {
 
 		CityDTO dto = new CityDTO(null, "Recife");
 		String jsonBody = objectMapper.writeValueAsString(dto);
-		
-		ResultActions result =
-				mockMvc.perform(post("/cities")
-					.content(jsonBody)
-					.contentType(MediaType.APPLICATION_JSON)
-					.accept(MediaType.APPLICATION_JSON));
-		
+
+		ResultActions result = mockMvc.perform(post("/cities").content(jsonBody).contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON));
+
 		result.andExpect(status().isCreated());
 		result.andExpect(jsonPath("$.id").exists());
 		result.andExpect(jsonPath("$.name").value("Recife"));
 	}
 
 	@Test
-	public void deleteShouldReturnNoContentWhenIndependentId() throws Exception {		
-		
+	public void deleteShouldReturnNoContentWhenIndependentId() throws Exception {
+
 		Long independentId = 5L;
-		
-		ResultActions result =
-				mockMvc.perform(delete("/cities/{id}", independentId));
-		
-		
+
+		ResultActions result = mockMvc.perform(delete("/cities/{id}", independentId));
+
 		result.andExpect(status().isNoContent());
 	}
 
 	@Test
-	public void deleteShouldReturnNotFoundWhenNonExistingId() throws Exception {		
+	public void deleteShouldReturnNotFoundWhenNonExistingId() throws Exception {
 
 		Long nonExistingId = 50L;
-		
-		ResultActions result =
-				mockMvc.perform(delete("/cities/{id}", nonExistingId));
+
+		ResultActions result = mockMvc.perform(delete("/cities/{id}", nonExistingId));
 
 		result.andExpect(status().isNotFound());
 	}
 
 	@Test
-	@Transactional(propagation = Propagation.NEVER) 
-	public void deleteShouldReturnBadRequestWhenDependentId() throws Exception {		
+	@Transactional(propagation = Propagation.NEVER)
+	public void deleteShouldReturnBadRequestWhenDependentId() throws Exception {
 
 		Long dependentId = 1L;
-		
-		ResultActions result =
-				mockMvc.perform(delete("/cities/{id}", dependentId));
-				
+
+		ResultActions result = mockMvc.perform(delete("/cities/{id}", dependentId));
+
 		result.andExpect(status().isBadRequest());
 	}
 }
